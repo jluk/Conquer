@@ -1,0 +1,132 @@
+Chapter - Due Date
+Chapter 11 - March 15
+Chapter 12 - March 22
+Chapter 13* (Collections) - March 29
+Chapter 14 - April 5
+Chapter 17* (Type Parameters) - April 12
+Chapter 18 - April 19
+Chapter 21* (Implicits) - April 26
+
+Final Project - May 15
+
+Ideas:
+
+Training Program Efficacy
+*Workout plan suggester (algorithmic for BB vs. Powerlifters vs. Oly specifics)
+*Progressive overload tracking (volume + weight)
+*Diet tracker (macrolevel, waiting an MFP API request)
+*D3 visualizations, working with scala.js?
+*front end heavy
+*reddit tie-in? profile history text analysis?
+
+Featureset
+1. Track
+    a. Lifts from the day
+    b. Weight
+        i. Caloric change based on weight (+- 500 etc.)
+        ii. Rate of change (safety)
+        iii. BF Inference
+    c. Daily caloric intake (pending MFP request)
+
+    Take user input fields and map into db
+
+2. Find suitable workout regimen
+    a. Select Goal + Timeframe
+    b. Select workouts/week
+    c. Select experience level
+
+3. Analyze (Front End .js heavy)
+    a. Weightlifting
+        i. Progressive Overload
+        ii. Compound lift changes
+        iii. Power Index
+        iv. Failure: After x failed increases, suggest deload
+    b. Weight Change
+        i. Caloric change based on weight
+        ii. Rate of change (safety)
+        iii. BF Inference
+    c. Mentality
+        i. Completion of routines
+
+4. Inspire (Galleria)
+    a. Instagram feed of popular fitness leaders
+        i. Arnold S.
+        ii. Layne Norton
+        iii. (sectioned by power, bb, oly)
+    b. Feed of healthy foods
+        i. Picture
+        ii. Recipe
+        iii. Macros
+    c. Motivation
+        i. Videos
+        ii. Quotes
+        iii. User stories
+
+Tech Stack
+*Scala
+*Play Framework
+*Angular.js?
+*Scala.js
+*ReactiveMongo
+*bootstrap
+*LESS (Advanced CSS)
+
+Tools
+Waffle.io
+Travis CI
+
+TODO:
+1. setup heroku
+    a. add mongodb plugin
+    b. deploy heroku
+    c. visit website and verify
+2. add issues in github
+3. organize waffle.io
+4. remove play-reactivemongo and replace with plain reactivemongo (with Lance)
+5. add passing tests
+6. add travis CI support
+
+Status page
+User logins: Play authenticate (FB, gmail, etc.) //make a decision, it is not easy to do
+Data: what collections for mongo: users, workout plan
+Samples: use mongo console to insert sample data (learn from Lance how to save to mongo)
+UI: how to display the data for users --> mockups
+
+
+
+
+
+
+Schedule
+Backlog
+*Draft Project proposal
+    *Who, Why, How
+*Requirements
+
+3/29
+*Initial Design
+
+4/5
+*Design review
+*Design Sign off
+
+4/12
+*Develop
+
+4/19 (Dead Week)
+*Develop
+
+4/26 (Finals)
+*Develop
+
+5/3
+*Develop
+
+5/10 (Korea)
+* Test
+
+5/17 (Korea)
+* Bug Fix
+
+5/24
+* Deploy
