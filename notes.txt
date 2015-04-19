@@ -1,0 +1,12 @@
+
+Terminal Commands for MongoDB
+
+>> launchctl load /usr/local/opt/mongodb/homebrew.mxcl.mongodb.plist
+- loads a process into the background
+
+>> ps -aef
+- list all processes running on the machine
+>> ps -aef | grep mongo
+- "|" is a pipe and the left side feeds the input for the right side
+- grep takes the input and outputs lines with "mongo" in it
+

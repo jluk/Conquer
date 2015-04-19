@@ -65,7 +65,7 @@ Featureset
 Tech Stack
 *Scala
 *Play Framework
-*Angular.js?
+*Angular.js? - out
 *Scala.js
 *ReactiveMongo
 *bootstrap
