@@ -10,3 +10,14 @@ Terminal Commands for MongoDB
 - "|" is a pipe and the left side feeds the input for the right side
 - grep takes the input and outputs lines with "mongo" in it
 
+git reset --hard
+>> discard all changes (even too notes!)
+
+git revert
+>> go back to a previous commit by applying a new commit that reverts changes
+
+git stash
+>> stash changes in a change stack (git stash pop to get them back); always local
+
+git branch
+>> create a "branch" of current commit where new commits don't change original branch until "merge" later
