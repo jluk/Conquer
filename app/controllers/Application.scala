@@ -2,6 +2,8 @@ package controllers
 
 import java.util.concurrent.TimeoutException
 
+import reactivemongo.core.commands.LastError
+
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
@@ -17,8 +19,7 @@ import play.api.data.Forms.nonEmptyText
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
-import play.api.mvc.Action
-import play.api.mvc.Controller
+import play.api.mvc.{Result, Action, Controller}
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
 import reactivemongo.bson.BSONObjectID
@@ -92,15 +93,14 @@ object Application extends Controller with MongoController {
    * @param filter Filter applied on employee names
    */
   def list(page: Int, orderBy: Int, filter: String) = Action.async { implicit request =>
-    //val futurePage: Future[Page[Employee]] = TimeoutFuture(Employee.list(page = page, orderBy = orderBy, filter = ("%" + filter + "%")))
-    val futurePage = filter.length > 0 match {
-      case true => collection.find(Json.obj("name" -> filter)).cursor[Employee].collect[List]()
-      case false => collection.genericQueryBuilder.cursor[Employee].collect[List]()
-    }
-    futurePage.map(employees => Ok(html.list(Page(employees, 0, 10, 20), orderBy, filter))).recover {
-      case t: TimeoutException =>
-        Logger.error("Problem found in employee list process")
-        InternalServerError(t.getMessage)
+    for {
+      employees <- if (filter.length > 0) {
+        collection.find(Json.obj("name" -> filter)).cursor[Employee].collect[List]()
+      } else {
+        collection.genericQueryBuilder.cursor[Employee].collect[List]()
+      }
+    } yield {
+      Ok(html.list(Page(employees, 0, 10, 20), orderBy, filter))
     }
   }
 
@@ -110,13 +110,10 @@ object Application extends Controller with MongoController {
    * @param id Id of the employee to edit
    */
   def edit(id: String) = Action.async {
-    val futureEmp = collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Employee].collect[List]()
-    futureEmp.map {
-      emps: List[Employee] => Ok(html.editForm(id, employeeForm.fill(emps.head)))
-    }.recover {
-      case t: TimeoutException =>
-        Logger.error("Problem found in employee edit process")
-        InternalServerError(t.getMessage)
+    for {
+      employees <- collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[Employee].collect[List]()
+    } yield {
+      Ok(html.editForm(id, employeeForm.fill(employees.head)))
     }
   }
 
@@ -129,13 +126,10 @@ object Application extends Controller with MongoController {
     employeeForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(html.editForm(id, formWithErrors))),
       employee => {
-        val futureUpdateEmp = collection.update(Json.obj("_id" -> Json.obj("$oid" -> id)), employee.copy(_id = BSONObjectID(id)))
-        futureUpdateEmp.map { result =>
-          Home.flashing("success" -> s"Employee ${employee.name} has been updated")
-        }.recover {
-          case t: TimeoutException =>
-            Logger.error("Problem found in employee update process")
-            InternalServerError(t.getMessage)
+        for {
+          lastError <- collection.update(Json.obj("_id" -> Json.obj("$oid" -> id)), employee.copy(_id = BSONObjectID(id)))
+        } yield {
+          flashResult(lastError, s"Employee ${employee.name} has been updated")
         }
       })
   }
@@ -154,26 +148,29 @@ object Application extends Controller with MongoController {
     employeeForm.bindFromRequest.fold(
       formWithErrors => Future.successful(BadRequest(html.createForm(formWithErrors))),
       employee => {
-        val futureUpdateEmp = collection.insert(employee.copy(_id = BSONObjectID.generate))
-        futureUpdateEmp.map { result =>
-          Home.flashing("success" -> s"Employee ${employee.name} has been created")
-        }.recover {
-          case t: TimeoutException =>
-            Logger.error("Problem found in employee update process")
-            InternalServerError(t.getMessage)
+        for {
+          lastError <- collection.insert(employee.copy(_id = BSONObjectID.generate))
+        } yield {
+          flashResult(lastError, s"Employee ${employee.name} has been created")
         }
       })
   }
 
+  def flashResult(lastError: LastError, success: String): Result = {
+    if (lastError.ok) {
+      Home.flashing("success" -> success)
+    } else {
+      Home.flashing("failure" -> "Failed to write to mongo!")
+    }
+  }
   /**
    * Handle employee deletion.
    */
   def delete(id: String) = Action.async {
-    val futureInt = collection.remove(Json.obj("_id" -> Json.obj("$oid" -> id)), firstMatchOnly = true)
-    futureInt.map(i => Home.flashing("success" -> "Employee has been deleted")).recover {
-      case t: TimeoutException =>
-        Logger.error("Problem deleting employee")
-        InternalServerError(t.getMessage)
+    for {
+      lastError <- collection.remove(Json.obj("_id" -> Json.obj("$oid" -> id)), firstMatchOnly = true)
+    } yield {
+      flashResult(lastError, "Employee has been deleted")
     }
   }
 
