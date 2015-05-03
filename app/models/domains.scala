@@ -3,7 +3,40 @@ package models
 import reactivemongo.bson.BSONObjectID
 import java.util.Date
 
-case class Employee(_id: BSONObjectID, name: String, address: String, dob: Date, joiningDate: Date, designation: String)
+case class Employee(
+  _id: BSONObjectID,
+  name: String,
+  address: String,
+  dob: Date,
+  joiningDate: Date,
+  designation: String
+)
+
+case class User(
+  _id: BSONObjectID,
+  username: String,
+  passwordDigest: String
+)
+
+case class Stat(
+  _id: BSONObjectID,
+  userId: BSONObjectID,
+  name: String,
+  value: String
+)
+
+case class WorkoutPlan(
+  _id: BSONObjectID,
+  name: String,
+  exercises: Seq[String]
+)
+
+case class Workout(
+  _id: BSONObjectID,
+  userId: BSONObjectID,
+  workoutPlanId: BSONObjectID,
+  exerciseToWeightLifted: Map[String, Seq[Int]]
+)
 
 /**
  * Helper for pagination.
