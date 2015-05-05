@@ -156,13 +156,6 @@ object Application extends Controller with MongoController {
       })
   }
 
-  def flashResult(lastError: LastError, success: String): Result = {
-    if (lastError.ok) {
-      Home.flashing("success" -> success)
-    } else {
-      Home.flashing("failure" -> "Failed to write to mongo!")
-    }
-  }
   /**
    * Handle employee deletion.
    */
@@ -171,6 +164,21 @@ object Application extends Controller with MongoController {
       lastError <- collection.remove(Json.obj("_id" -> Json.obj("$oid" -> id)), firstMatchOnly = true)
     } yield {
       flashResult(lastError, "Employee has been deleted")
+    }
+  }
+
+  /**
+   * Helper method to check for lastError success or failure
+   *
+   * @param lastError LastError to be checked for success
+   * @param success String to be flashed upon success
+   * @return Result
+   */
+  def flashResult(lastError: LastError, success: String): Result = {
+    if (lastError.ok) {
+      Home.flashing("success" -> success)
+    } else {
+      Home.flashing("failure" -> "Failed to write to mongo!")
     }
   }
 

@@ -35,6 +35,7 @@ case class Workout(
   _id: BSONObjectID,
   userId: BSONObjectID,
   workoutPlanId: BSONObjectID,
+  weight: Float,
   exerciseToWeightLifted: Map[String, Seq[Int]]
 )
 
