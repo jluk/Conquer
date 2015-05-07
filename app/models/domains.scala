@@ -5,7 +5,7 @@ import java.util.Date
 
 case class Employee(
   _id: BSONObjectID,
-  date: Date,
+//  date: Date,
   name: String,
   address: String,
   dob: Date,
