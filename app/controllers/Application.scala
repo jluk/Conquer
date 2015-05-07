@@ -53,6 +53,7 @@ object Application extends Controller with MongoController {
   val employeeForm = Form(
     mapping(
       "id" -> ignored(BSONObjectID.generate: BSONObjectID),
+      "date" -> date("yyyy,MM-dd"),
       "name" -> nonEmptyText,
       "address" -> nonEmptyText,
       "dob" -> date("yyyy-MM-dd"),

@@ -27,35 +27,6 @@
     	<!-- Fixed navbar -->
 	    @navbar()
 
-		<!--Current Date Label-->
-		<h3 id="currDate"> <b> </b> </h3>
-
-		<script>
-			var d = new Date();
-			document.getElementById("currDate").innerHTML = "Today is " + d.toDateString();
-		</script>
-
-		<!--Weight Input Box-->
-		<p> Today's Weight </p>
-		<div class="row">
-			<div class="col-sm-3">
-				<div class="input-group">
-					<div class="input-group-btn">
-						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Action <span class="caret"></span></button>
-						<ul class="dropdown-menu" role="menu">
-							<li><a href="#">Pounds (lb)</a></li>
-							<li><a href="#">Kilograms (kg)</a></li>
-						</ul>
-					</div><!-- /btn-group -->
-					<input type="text" class="form-control" aria-label="...">
-				</div><!-- /input-group -->
-			</div><!-- /.col-lg-6 -->
-		</div><!-- /.row -->
-
-
-
-
-
 
         @content
 

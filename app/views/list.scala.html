@@ -41,13 +41,14 @@
 				<input type="search" id="searchbox" name="f" value="@currentFilter" placeholder="Filter by employee name...">
 				<input type="submit" id="searchsubmit" value="Filter by name" class="btn btn-primary btn-sm"> 
 			} 
-			<a class="btn btn-success btn-sm pull-right" id="add" href="@routes.Application.create()">Add a new employee</a>	
+			<a class="btn btn-success btn-sm pull-right" id="add" href="@routes.Application.create()">Log Workout</a>
 		</div>
 
 		@Option(currentPage.items).filterNot(_.isEmpty).map { employees =>
 			<table class="table table-striped">
 				<thead>
 					<tr>
+						@header(1, "Date")
 						@header(2, "Name")
 					 	@header(3, "Address") 
 					 	@header(4, "Date of Birth")
