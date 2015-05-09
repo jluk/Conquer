@@ -62,8 +62,8 @@
 					<tr>
 						<td><a href="@routes.Application.edit(employee._id.stringify)">@employee.name</a></td>
 						<td>@employee.address</td>
-						<td>@employee.dob.format("dd MMM yyyy")</td>
-						<td>@employee.joiningDate.format("dd MMM yyyy")</td>
+						<td>@employee.dob.format("MMM yyyy dd")</td>
+						<td>@employee.joiningDate.format("MMM yyyy dd")</td>
 						<td>@employee.designation</td>
 					</tr>
 					}
