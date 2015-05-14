@@ -12,6 +12,10 @@ GET    /employees              controllers.Application.list(p: Int ?= 0, s: Int 
 GET    /employees/new          controllers.Application.create
 POST   /employees/save         controllers.Application.save
 
+# Add user
+GET    /users/new          controllers.UserApplication.create
+POST   /users/save         controllers.UserApplication.save
+
 # Edit existing employee
 GET    /employees/:id          controllers.Application.edit(id: String)
 POST   /employees/:id          controllers.Application.update(id: String)
@@ -24,3 +28,4 @@ GET    /assets/*file           controllers.Assets.at(path="/public", file)
 
 # Map the webjar static assets to the /webjars URL
 GET    /webjars/*file          controllers.WebJarAssets.at(file)
+

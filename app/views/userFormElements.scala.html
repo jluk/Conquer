@@ -1,0 +1,8 @@
+@(userForm: Form[User])
+
+@import helper._
+
+@implicitFieldConstructor = @{ FieldConstructor(twitterBootstrapInput.f) }
+
+@inputText(userForm("username"), '_label -> "Username", 'class -> "form-control")
+@inputText(userForm("passwordDigest"), '_label -> "Password", 'class -> "form-control")

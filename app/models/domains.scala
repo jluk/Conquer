@@ -5,7 +5,6 @@ import java.util.Date
 
 case class Employee(
   _id: BSONObjectID,
-//  date: Date,
   name: String,
   address: String,
   dob: Date,
@@ -56,4 +55,6 @@ object JsonFormats {
 
   // Generates Writes and Reads for Feed and User thanks to Json Macros
   implicit val employeeFormat = Json.format[Employee]
+  implicit val userFormat = Json.format[User]
+
 }
