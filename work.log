@@ -8,3 +8,5 @@
 05/06/15, "jlukgt@gmail.com", 1.5, "Moved elements over to form page. Caused a js error...master is broken, branch is not by accident."
 05/08/15, "jlukgt@gmail.com", 0.5, "Fixing bugs to compile again, working on inputting into mongo"
 05/15,15, "jlukgt@gmail.com", 2.5, "Added create user pages, syncing into mongo correctly TBD"
+05/16/15, "jlukgt@gmail.com", 0.5, "Bug fixing"
+05/17/15, "jlukgt@gmail.com", 1,
