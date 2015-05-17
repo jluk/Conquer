@@ -2,6 +2,7 @@ package controllers
 
 import java.util.concurrent.TimeoutException
 
+import play.Application
 import reactivemongo.core.commands.LastError
 
 import scala.concurrent.Future
@@ -71,55 +72,6 @@ object UserApplication extends Controller with MongoController {
      */
     val Home = Redirect(routes.Application.list())
 
-//    /**
-//     * Display the paginated list of Users.
-//     *
-//     * @param page Current page number (starts from 0)
-//     * @param orderBy Column to be sorted
-//     * @param filter Filter applied on User names
-//     */
-//    def list(page: Int, orderBy: Int, filter: String) = Action.async { implicit request =>
-//      for {
-//        users <- if (filter.length > 0) {
-//          collection.find(Json.obj("name" -> filter)).cursor[User].collect[List]()
-//        } else {
-//          collection.genericQueryBuilder.cursor[User].collect[List]()
-//        }
-//      } yield {
-//        Ok(html.list(Page(users, 0, 10, 20), orderBy, filter))
-//      }
-//    }
-
-//    /**
-//     * Display the 'edit form' of a existing user.
-//     *
-//     * @param id Id of the user to edit
-//     */
-//    def edit(id: String) = Action.async {
-//      for {
-//        users <- collection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).cursor[User].collect[List]()
-//      } yield {
-//        Ok(html.editForm(id, userForm.fill(users.head)))
-//      }
-//    }
-//
-//    /**
-//     * Handle the 'edit form' submission
-//     *
-//     * @param id Id of the user to edit
-//     */
-//    def update(id: String) = Action.async { implicit request =>
-//      userForm.bindFromRequest.fold(
-//        formWithErrors => Future.successful(BadRequest(html.editForm(id, formWithErrors))),
-//        user => {
-//          for {
-//            lastError <- collection.update(Json.obj("_id" -> Json.obj("$oid" -> id)), user.copy(_id = BSONObjectID(id)))
-//          } yield {
-//            flashResult(lastError, s"User ${user.username} has been updated")
-//          }
-//        })
-//    }
-
     /**
      * Display the 'new user form'.
      */
@@ -142,18 +94,4 @@ object UserApplication extends Controller with MongoController {
         })
     }
 
-    /**
-     * Helper method to check for lastError success or failure
-     *
-     * @param lastError LastError to be checked for success
-     * @param success String to be flashed upon success
-     * @return Result
-     */
-    def flashResult(lastError: LastError, success: String): Result = {
-      if (lastError.ok) {
-        Home.flashing("success" -> success)
-      } else {
-        Home.flashing("failure" -> "Failed to write to mongo!")
-      }
-    }
 }
