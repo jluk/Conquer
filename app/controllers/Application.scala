@@ -2,14 +2,15 @@ package controllers
 
 import java.util.concurrent.TimeoutException
 
+import org.joda.time.DateTime
+import play.api.libs.iteratee.Enumerator
 import reactivemongo.core.commands.LastError
 
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
-import models.Employee
+import models._
 import models.JsonFormats.employeeFormat
-import models.Page
 import play.api.Logger
 import play.api.data.Form
 import play.api.data.Forms.date
@@ -17,12 +18,12 @@ import play.api.data.Forms.ignored
 import play.api.data.Forms.mapping
 import play.api.data.Forms.nonEmptyText
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.Json
+import play.api.libs.json.{JsNull, JsObject, Json}
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.{Result, Action, Controller}
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection.JSONCollection
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson._
 import views.html
 
 /*
@@ -59,6 +60,8 @@ object Application extends Controller with MongoController {
       "joiningDate" -> date("yyyy-MM-dd"),
       "designation" -> nonEmptyText)(Employee.apply)(Employee.unapply))
 
+  val currUser = User(BSONObjectID.generate, "currUser", "password123")
+
   /*
    * Get a JSONCollection (a Collection implementation that is designed to work
    * with JsObject, Reads and Writes.)
@@ -68,6 +71,45 @@ object Application extends Controller with MongoController {
    */
   def collection: JSONCollection = db.collection[JSONCollection]("employees")
 
+  def users: JSONCollection = db.collection[JSONCollection]("users")
+
+  def workoutPlans: JSONCollection = db.collection[JSONCollection]("workoutplans")
+
+  def workouts: JSONCollection = db.collection[JSONCollection]("workouts")
+
+
+  def dbInit = Action.async{ request =>
+    val wps = Seq(
+      WorkoutPlan(
+        _id = BSONObjectID.generate,
+        name = "Upper Power",
+        exercises = Seq("Bench", "Incline", "Decline")
+      )
+
+    )
+
+    val ws = Seq(
+      Workout(
+        _id = BSONObjectID.generate,
+        when = DateTime.now(),
+        userId = currUser._id,
+        workoutPlanId = wps(0)._id,
+        weight = 175,
+        exerciseToWeightLifted = Map(
+          "Bench" -> Seq(215,225,235)
+        )
+      )
+    )
+
+    for {
+      _ <- users.drop()
+      _ <- workoutPlans.drop()
+      _ <- workouts.drop()
+      _ <- users.insert(Json.toJson(currUser))
+      _ <- workoutPlans.bulkInsert(Enumerator(wps.map(Json.toJson(_))))
+      _ <- workouts.bulkInsert(Enumerator(ws.map(Json.toJson(_))))
+    } yield Ok("Initialized mongo")
+  }
   // ------------------------------------------ //
   // Using case classes + Json Writes and Reads //
   // ------------------------------------------ //
@@ -84,6 +126,75 @@ object Application extends Controller with MongoController {
    * This result directly redirect to the application home.
    */
   val Home = Redirect(routes.Application.list())
+
+  def fetchUserTrackData(id: String): Future[Option[TrackData]] = {
+    for {
+      optUser <- {
+        users.find(
+          Json.obj("_id" ->
+            Json.obj("$oid" -> id)
+          )
+        ).one[User]
+      }
+      allWorkoutPlans <- {
+        workoutPlans.find(JsNull).cursor[WorkoutPlan].collect[Seq]()
+      }
+      optTrackData <- {
+        optUser match {
+          case Some(user) =>
+            for {
+              allWorkouts <- {
+                workouts.find(
+                  Json.obj("_id" ->
+                    Json.obj("$oid" -> user._id.stringify)
+                  )
+                ).cursor[Workout].collect[Seq]()
+              }
+            } yield {
+              val optLatestWorkout =
+                allWorkouts.sortBy(_.when.getMillis).headOption
+              optLatestWorkout match {
+
+                case Some(latestWorkout) =>
+                  TrackData(
+                    userId = user._id,
+                    username = user.username,
+                    userWeight = Some(latestWorkout.weight),
+                    allWorkoutPlans = allWorkoutPlans,
+                    exerciseLiftHistory = latestWorkout.exerciseToWeightLifted
+                  )
+
+                case None =>
+                  TrackData(
+                    userId = user._id,
+                    username = user.username,
+                    userWeight = None,
+                    allWorkoutPlans = allWorkoutPlans,
+                    exerciseLiftHistory = Map.empty
+                  )
+              }
+              val trackData : TrackData = ???
+              Some(trackData)
+            }
+          case None => Future.successful(None)
+        }
+      }
+    } yield optTrackData
+  }
+
+  def track(id: String) = Action.async { request =>
+    for {
+      optTrackData <- fetchUserTrackData(currUser._id.stringify)
+    } yield {
+      optTrackData match {
+        case Some(trackData) =>
+          Ok(html.track(trackData))
+        case None =>
+          BadRequest(s"No user with id $id")
+      }
+    }
+
+  }
 
   /**
    * Display the paginated list of employees.

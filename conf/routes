@@ -12,9 +12,8 @@ GET    /employees              controllers.Application.list(p: Int ?= 0, s: Int 
 GET    /employees/new          controllers.Application.create
 POST   /employees/save         controllers.Application.save
 
-# Add user
-GET    /users/new          controllers.UserApplication.create
-POST   /users/save         controllers.UserApplication.save
+# Init Database
+POST /dbInit                controllers.Application.dbInit
 
 # Edit existing employee
 GET    /employees/:id          controllers.Application.edit(id: String)
@@ -22,6 +21,9 @@ POST   /employees/:id          controllers.Application.update(id: String)
 
 # Delete a computer
 POST   /employees/:id/delete   controllers.Application.delete(id: String)
+
+GET /track/:id                  controllers.Application.track(id: String)
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET    /assets/*file           controllers.Assets.at(path="/public", file)
