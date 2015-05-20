@@ -102,12 +102,12 @@ object Application extends Controller with MongoController {
     )
 
     for {
-      _ <- users.drop()
-      _ <- workoutPlans.drop()
-      _ <- workouts.drop()
+      _ <- users.remove(Json.obj())
+      _ <- workoutPlans.remove(Json.obj())
+      _ <- workouts.remove(Json.obj())
       _ <- users.insert(Json.toJson(currUser))
-      _ <- workoutPlans.bulkInsert(Enumerator(wps.map(Json.toJson(_))))
-      _ <- workouts.bulkInsert(Enumerator(ws.map(Json.toJson(_))))
+      _ <- workoutPlans.bulkInsert(Enumerator(wps:_*))
+      _ <- workouts.bulkInsert(Enumerator(ws:_*))
     } yield Ok("Initialized mongo")
   }
   // ------------------------------------------ //
