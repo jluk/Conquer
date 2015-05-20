@@ -13,7 +13,7 @@ GET    /employees/new          controllers.Application.create
 POST   /employees/save         controllers.Application.save
 
 # Init Database
-POST /dbInit                controllers.Application.dbInit
+GET /dbInit                controllers.Application.dbInit
 
 # Edit existing employee
 GET    /employees/:id          controllers.Application.edit(id: String)
