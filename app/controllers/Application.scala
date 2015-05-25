@@ -60,6 +60,11 @@ object Application extends Controller with MongoController {
       "joiningDate" -> date("yyyy-MM-dd"),
       "designation" -> nonEmptyText)(Employee.apply)(Employee.unapply))
 
+  /**
+   * TODO: Implement user logins/social media access
+   *
+   * static user for the time being
+   */
   val currUser = User(BSONObjectID.generate, "currUser", "password123")
 
   /*
@@ -96,7 +101,9 @@ object Application extends Controller with MongoController {
         workoutPlanId = wps(0)._id,
         weight = 175,
         exerciseToWeightLifted = Map(
-          "Bench" -> Seq(215,225,235)
+          "Bench" -> Seq(215,225,235),
+          "Incline" -> Seq(185, 185, 185),
+          "Decline" -> Seq(200,205,205)
         )
       )
     )
@@ -110,6 +117,8 @@ object Application extends Controller with MongoController {
       _ <- workouts.bulkInsert(Enumerator(ws:_*))
     } yield Ok("Initialized mongo")
   }
+
+
   // ------------------------------------------ //
   // Using case classes + Json Writes and Reads //
   // ------------------------------------------ //
@@ -127,8 +136,12 @@ object Application extends Controller with MongoController {
    */
   val Home = Redirect(routes.Application.list())
 
+  /**
+   * Retrieve all workout data for a specific user id
+   */
   def fetchUserTrackData(id: String): Future[Option[TrackData]] = {
     for {
+      //search for user based on String input
       optUser <- {
         users.find(
           Json.obj("_id" ->
@@ -136,11 +149,15 @@ object Application extends Controller with MongoController {
           )
         ).one[User]
       }
+
+      //grab sequence of workouts from user's workout plan
       allWorkoutPlans <- {
         workoutPlans.find(JsNull).cursor[WorkoutPlan].collect[Seq]()
       }
+
       optTrackData <- {
         optUser match {
+            //if user exists, grab the workouts associated with the id
           case Some(user) =>
             for {
               allWorkouts <- {
@@ -155,6 +172,7 @@ object Application extends Controller with MongoController {
                 allWorkouts.sortBy(_.when.getMillis).headOption
               optLatestWorkout match {
 
+                  //latestWorkout exists, retrieve it
                 case Some(latestWorkout) =>
                   TrackData(
                     userId = user._id,
@@ -164,6 +182,7 @@ object Application extends Controller with MongoController {
                     exerciseLiftHistory = latestWorkout.exerciseToWeightLifted
                   )
 
+                  //latestWorkout DNE, create new with user id
                 case None =>
                   TrackData(
                     userId = user._id,
@@ -182,6 +201,11 @@ object Application extends Controller with MongoController {
     } yield optTrackData
   }
 
+  /**
+   * Grab user's workout data
+   * @param id
+   * @return Action.sync
+   */
   def track(id: String) = Action.async { request =>
     for {
       optTrackData <- fetchUserTrackData(currUser._id.stringify)
